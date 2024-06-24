@@ -6,54 +6,53 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: 20
-
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Build the project
-      run: npm run build
-
-    - name: Zip the build artifacts
-      run: zip -r build.zip .next node_modules package.json
 
     - name: Install SSH Key
       uses: shimataro/ssh-key-action@v2
       with:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ secrets.KNOWN_HOSTS }}
-
-    - name: Transfer the build to the server
-      uses: appleboy/scp-action@v0.1.1
-      with:
-        source: "build.zip"
-        target: "/home/u820803326/domains/webnexa.net/public_html/our_projects/next/nstarter/build.zip"
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USERNAME }}
-        port: ${{ secrets.SERVER_PORT }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-    - name: Deploy on server
+    
+    - name: Deploy to Server
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USERNAME }}
-        port: ${{ secrets.SERVER_PORT }}
+        host: 154.56.33.96
+        username: u820803326
+        port: 65002
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
+          set -e # Exit immediately if a command exits with a non-zero status
           cd /home/u820803326/domains/webnexa.net/public_html/our_projects/next/nstarter
-          echo "Unzipping the build..."
-          unzip -o build.zip
-          rm build.zip
+          
+          echo "Pulling latest code from main branch..."
+          git pull origin main
+
+          echo "Removing old build and node_modules..."
+          rm -rf .next
+          rm -rf node_modules
+
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+          echo "Switching to Node.js version 20..."
+          nvm use 20
+
+          echo "Setting Node.js memory limit..."
+          export NODE_OPTIONS="--max-old-space-size=4096"
+
+          echo "Checking for existing Node processes..."
+          ps aux | grep node
+
+          echo "Installing dependencies..."
+          npm ci
+
+          echo "Building the project..."
+          npm run build
+
           echo "Starting the application..."
           npm start
