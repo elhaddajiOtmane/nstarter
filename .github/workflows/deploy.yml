@@ -35,12 +35,18 @@ jobs:
           echo "Removing old build and node_modules..."
           rm -rf .next
           rm -rf node_modules
-          
+
           export NVM_DIR="$HOME/.nvm"
           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-          
+
+          echo "Increasing system limits..."
+          ulimit -u unlimited
+
           echo "Switching to Node.js version 20..."
           nvm use 20
+
+          echo "Setting Node.js memory limit..."
+          export NODE_OPTIONS="--max-old-space-size=4096"
 
           echo "Installing dependencies..."
           npm ci
