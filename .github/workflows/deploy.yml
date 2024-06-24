@@ -45,6 +45,9 @@ jobs:
           echo "Setting Node.js memory limit..."
           export NODE_OPTIONS="--max-old-space-size=4096"
 
+          echo "Checking for existing Node processes..."
+          ps aux | grep node
+
           echo "Installing dependencies..."
           npm ci
 
