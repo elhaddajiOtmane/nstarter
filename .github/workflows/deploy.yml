@@ -19,7 +19,5 @@ jobs:
         script: |
           cd /home/u820803326/public_html/site.webenexa.net
           git pull origin main
-          # Add any additional deployment steps here, like:
-          # composer install
-          # npm install
-          # npm run build
+          npm install
+          npm run build
