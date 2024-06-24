@@ -1,8 +1,10 @@
 name: Deploy to Production
+
 on:
   push:
     branches:
       - main
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -24,10 +26,27 @@ jobs:
         port: 65002
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
+          set -e # Exit immediately if a command exits with a non-zero status
           cd /home/u820803326/domains/webnexa.net/public_html/our_projects/next/nstarter
+          
+          echo "Pulling latest code from main branch..."
           git pull origin main
+
+          echo "Removing old build and node_modules..."
+          rm -rf .next
+          rm -rf node_modules
+          
           export NVM_DIR="$HOME/.nvm"
           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          
+          echo "Switching to Node.js version 20..."
           nvm use 20
-          npm install
+
+          echo "Installing dependencies..."
+          npm ci
+
+          echo "Building the project..."
           npm run build
+
+          echo "Starting the application..."
+          npm start
