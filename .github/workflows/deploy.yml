@@ -57,3 +57,4 @@ jobs:
           rm build.zip
           echo "Starting the application..."
           npm start
+ 
