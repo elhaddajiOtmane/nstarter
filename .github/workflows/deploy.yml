@@ -1,14 +1,15 @@
 name: Deploy to Production
-
 on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
     - name: Install SSH Key
       uses: shimataro/ssh-key-action@v2
       with:
@@ -18,9 +19,9 @@ jobs:
     - name: Deploy to Server
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        port: ${{ secrets.PORT }}
+        host: 154.56.33.96
+        username: u820803326
+        port: 65002
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd /home/u820803326/domains/site.webnexa.net/public_html/site.webenexa.net
